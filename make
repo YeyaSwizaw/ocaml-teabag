@@ -10,4 +10,4 @@ for f in src/*.ml; do
 	$OCAMLC -c $f 
 done
 
-$OCAMLC TeabagGame.cmo test.ml -o test
+$OCAMLC str.cma TeabagGlobal.cmo TeabagGame.cmo test.ml -o test

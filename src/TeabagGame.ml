@@ -1,3 +1,4 @@
+open TeabagGlobal;;
 open OcsfmlGraphics;;
 open OcsfmlWindow;;
 
@@ -22,12 +23,36 @@ type eventtype =
     | JoystickDisconnected
 
 class game = object(self)
+    val mutable gamename = "Teabag Engine"
+    val mutable winw = 800
+    val mutable winh = 600
     val mutable window = new render_window (VideoMode.create ~w:100 ~h:100 ()) "Teabag"
     val mutable evtfuncs = Hashtbl.create 10
+    val mutable tickfuncs = []
 
-    method init width height = window#create (VideoMode.create ~w:width ~h:height ()) "Teabag"
+    method init = (
+        let parseline line = match line with
+            | "wind"::tl -> (match tl with
+                | [w; h] -> winw <- (int_of_string w); winh <- (int_of_string h); ()
+                | _ -> ())
+
+            | "name"::tl -> gamename <- (String.concat " " tl); ()
+
+            | _ -> ()
+        in
+
+        let rec parsefile file = match file with
+            | [] -> ()
+            | hd::tl -> parseline hd; parsefile tl
+        in
+
+        parsefile (readfile "data/main.tea");
+        window#create (VideoMode.create ~w:winw ~h:winh ()) gamename 
+
+    )
 
     method addevtcall (etype:eventtype) (efun:Event.t -> unit) = Hashtbl.add evtfuncs etype efun
+    method addtickcall (tfun:unit -> unit) = tickfuncs <- (tfun::tickfuncs); ()
 
     method run = (
         let rec callfuncs fs e = match fs with
@@ -64,9 +89,15 @@ class game = object(self)
             | _ -> ()
         in
 
+        let rec callticks ls = match ls with 
+            | [] -> ()
+            | f::tl -> f (); callticks tl;
+        in
+
         let rec mainloop () = 
             if window#is_open then (
                 eventloop ();
+                callticks tickfuncs;
 
                 window#clear ();
                 window#display;

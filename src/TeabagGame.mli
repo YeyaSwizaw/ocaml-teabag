@@ -23,11 +23,16 @@ type eventtype =
     | JoystickDisconnected
 
 class game : object
+    val mutable gamename : string
+    val mutable winw : int
+    val mutable winh : int
     val mutable window : render_window
     val mutable evtfuncs : (eventtype, (Event.t -> unit)) t
+    val mutable tickfuncs : (unit -> unit) list
 
-    method init : int -> int -> unit
+    method init : unit
     method addevtcall : eventtype -> (Event.t -> unit) -> unit
+    method addtickcall : (unit -> unit) -> unit
 
     method run : unit
     method quit : unit
