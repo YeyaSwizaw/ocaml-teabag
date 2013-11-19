@@ -69,7 +69,8 @@ class game = object(self)
         in
 
         parsefile (readfile "data/main.tea");
-        window#create (VideoMode.create ~w:winw ~h:winh ()) gamename 
+        window#create (VideoMode.create ~w:winw ~h:winh ()) gamename ;
+        window#set_framerate_limit 60
 
     )
 
@@ -143,5 +144,12 @@ class game = object(self)
         if Hashtbl.mem tbl name then
             let spr = Hashtbl.find tbl name in spr#move (float_of_int x) (float_of_int y)
         else ()
+
+    method getentitybounds name = 
+        let tbl = m#getsprites in
+        
+        if Hashtbl.mem tbl name then
+            let spr = Hashtbl.find tbl name in spr#get_global_bounds
+        else FloatRect.create ()
 
 end

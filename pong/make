@@ -1,0 +1,5 @@
+#!/bin/bash
+
+OCAMLC="ocamlfind ocamlc -I src -linkpkg -package ocsfml.graphics"
+
+$OCAMLC str.cma TeabagGlobal.cmo TeabagMap.cmo TeabagGame.cmo pong.ml -o pong

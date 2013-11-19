@@ -49,5 +49,6 @@ class game : object
     method keypressed : KeyCode.t -> bool
 
     method moveentity : string -> int -> int -> unit
+    method getentitybounds : string -> float rect
 
 end
