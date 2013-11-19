@@ -7,13 +7,16 @@ class map = object(self)
     val mutable nametotex = Hashtbl.create 10
     val mutable nametoblocking = Hashtbl.create 10
 
+    val mutable enttextures = Hashtbl.create 10
+
     val mutable tilesize = 0
     val mutable mapw = 100
     val mutable maph = 100
 
-    val mutable tiles = [["test to stop it complaining about type"]]
+    val mutable tiles = []
 
     val mutable rendtex = new render_texture 100 100
+    val mutable entlist = []
 
     method tilefromcolour c = if (Hashtbl.mem colourtoname c) then (Hashtbl.find colourtoname c) else ""
     method texfromname n = Hashtbl.find nametotex n
@@ -32,9 +35,44 @@ class map = object(self)
                 Hashtbl.add nametoblocking name blocking
             ) in
 
-            let rec parseline line = match line with
+            let loadentity name x y = (
+                let spr = new sprite ~position:(x, y) () in
+
+                let settex texname = (
+                    let texfile = "data/sprites/" ^ texname ^ ".png" in
+                    let tex = new texture (`File texfile) in
+
+                    Hashtbl.add enttextures texname tex;
+                    spr#set_texture (Hashtbl.find enttextures texname)
+                ) in
+
+                let parseline line = match line with
+                    | "sprite"::tl -> (match tl with
+                        | [name] -> settex name
+                        | _ -> ())
+
+                    | _ -> ()
+                in
+
+                let rec parsefile file = match file with
+                    | [] -> ()
+                    | hd::tl -> parseline hd; parsefile tl
+                in
+
+                parsefile (readfile ("data/entities/" ^ name ^ ".tea"));
+                entlist <- (spr::entlist);
+                
+                ()
+                       
+            ) in
+
+            let parseline line = match line with
                 | "tile"::tl -> (match tl with
                     | [r; g; b; name; blocking] -> loadtile (int_of_string r) (int_of_string g) (int_of_string b) name (bool_of_string blocking)
+                    | _ -> ())
+
+                | "entity"::tl -> (match tl with
+                    | [name; x; y] -> loadentity name (float_of_string x) (float_of_string y)
                     | _ -> ())
 
                 | _ -> ()
@@ -103,6 +141,8 @@ class map = object(self)
     )
 
     method gettex = rendtex#get_texture
+
+    method getents = entlist
 
 end
 

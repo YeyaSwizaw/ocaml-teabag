@@ -3,7 +3,7 @@ open OcsfmlGraphics;;
 open OcsfmlWindow;;
 open Hashtbl;;
 
-type eventtype = 
+type eventtype =
     | Closed
     | LostFocus
     | GainedFocus

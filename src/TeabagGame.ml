@@ -116,6 +116,11 @@ class game = object(self)
             | f::tl -> f (); callticks tl;
         in
 
+        let rec renderlist ls = match ls with
+            | [] -> ()
+            | h::tl -> window#draw h; renderlist tl
+        in
+
         let rec mainloop () = 
             if window#is_open then (
                 eventloop ();
@@ -123,6 +128,7 @@ class game = object(self)
 
                 window#clear ();
                 window#draw mapspr;
+                renderlist m#getents;
                 window#display;
 
                 mainloop ();
