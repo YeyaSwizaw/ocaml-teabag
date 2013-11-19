@@ -1,4 +1,5 @@
 open TeabagGlobal;;
+open TeabagMap;;
 open OcsfmlGraphics;;
 open OcsfmlWindow;;
 
@@ -26,17 +27,38 @@ class game = object(self)
     val mutable gamename = "Teabag Engine"
     val mutable winw = 800
     val mutable winh = 600
-    val mutable window = new render_window (VideoMode.create ~w:100 ~h:100 ()) "Teabag"
+
+    val mutable window = new render_window (VideoMode.create ~w:800 ~h:600 ()) "Teabag"
+
+    val mutable m = new map
+
     val mutable evtfuncs = Hashtbl.create 10
     val mutable tickfuncs = []
 
-    method init = (
+    val mutable mapspr = new sprite ()
+
+    method loadmap n = (
+        m#load n;
+
+        mapspr <- new sprite ~texture:(m#gettex) ~position:(0.0, 0.0) ();
+
+        ()
+
+    )
+
+    method init loadmapnow = (
         let parseline line = match line with
             | "wind"::tl -> (match tl with
                 | [w; h] -> winw <- (int_of_string w); winh <- (int_of_string h); ()
                 | _ -> ())
 
             | "name"::tl -> gamename <- (String.concat " " tl); ()
+
+            | "start"::tl -> (if loadmapnow then (
+                match tl with
+                    | [n] -> self#loadmap n
+                    | _ -> ()
+                ) else () )
 
             | _ -> ()
         in
@@ -100,6 +122,7 @@ class game = object(self)
                 callticks tickfuncs;
 
                 window#clear ();
+                window#draw mapspr;
                 window#display;
 
                 mainloop ();
