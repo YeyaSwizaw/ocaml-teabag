@@ -116,11 +116,6 @@ class game = object(self)
             | f::tl -> f (); callticks tl;
         in
 
-        let rec renderlist ls = match ls with
-            | [] -> ()
-            | h::tl -> window#draw h; renderlist tl
-        in
-
         let rec mainloop () = 
             if window#is_open then (
                 eventloop ();
@@ -128,7 +123,7 @@ class game = object(self)
 
                 window#clear ();
                 window#draw mapspr;
-                renderlist m#getents;
+                let draw _ s = window#draw s in Hashtbl.iter draw (m#getsprites);
                 window#display;
 
                 mainloop ();
@@ -139,5 +134,14 @@ class game = object(self)
     )
 
     method quit = window#close
+
+    method keypressed k = Keyboard.is_key_pressed k
+
+    method moveentity name x y = 
+        let tbl = m#getsprites in
+
+        if Hashtbl.mem tbl name then
+            let spr = Hashtbl.find tbl name in spr#move (float_of_int x) (float_of_int y)
+        else ()
 
 end

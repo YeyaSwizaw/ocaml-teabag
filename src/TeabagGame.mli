@@ -45,4 +45,9 @@ class game : object
 
     method run : unit
     method quit : unit
+
+    method keypressed : KeyCode.t -> bool
+
+    method moveentity : string -> int -> int -> unit
+
 end

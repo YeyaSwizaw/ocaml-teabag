@@ -8,6 +8,7 @@ class map = object(self)
     val mutable nametoblocking = Hashtbl.create 10
 
     val mutable enttextures = Hashtbl.create 10
+    val mutable sprites = Hashtbl.create 10
 
     val mutable tilesize = 0
     val mutable mapw = 100
@@ -16,7 +17,6 @@ class map = object(self)
     val mutable tiles = []
 
     val mutable rendtex = new render_texture 100 100
-    val mutable entlist = []
 
     method tilefromcolour c = if (Hashtbl.mem colourtoname c) then (Hashtbl.find colourtoname c) else ""
     method texfromname n = Hashtbl.find nametotex n
@@ -30,9 +30,9 @@ class map = object(self)
                 
                 tilesize <- a;
 
-                Hashtbl.add colourtoname (Color.rgb r g b) name;
-                Hashtbl.add nametotex name tex;
-                Hashtbl.add nametoblocking name blocking
+                Hashtbl.replace colourtoname (Color.rgb r g b) name;
+                Hashtbl.replace nametotex name tex;
+                Hashtbl.replace nametoblocking name blocking
             ) in
 
             let loadentity name x y = (
@@ -42,7 +42,7 @@ class map = object(self)
                     let texfile = "data/sprites/" ^ texname ^ ".png" in
                     let tex = new texture (`File texfile) in
 
-                    Hashtbl.add enttextures texname tex;
+                    Hashtbl.replace enttextures texname tex;
                     spr#set_texture (Hashtbl.find enttextures texname)
                 ) in
 
@@ -60,7 +60,7 @@ class map = object(self)
                 in
 
                 parsefile (readfile ("data/entities/" ^ name ^ ".tea"));
-                entlist <- (spr::entlist);
+                Hashtbl.replace sprites name spr;
                 
                 ()
                        
@@ -142,7 +142,7 @@ class map = object(self)
 
     method gettex = rendtex#get_texture
 
-    method getents = entlist
+    method getsprites = sprites
 
 end
 
